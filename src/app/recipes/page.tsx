@@ -92,14 +92,15 @@ export default function RecipesPage() {
 
   const filteredRecipes = recipes.filter(recipe => {
     const matchesSearch = recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         recipe.description.toLowerCase().includes(searchQuery.toLowerCase());
+                         recipe.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         recipe.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesDifficulty = selectedDifficulty === 'all' || recipe.difficulty === selectedDifficulty;
     
     // Dietary filters (mock implementation - in real app would check recipe tags)
     const matchesDietary = selectedDietaryFilters.length === 0 || 
       selectedDietaryFilters.some(filter => {
         // Mock logic - in real app, recipes would have dietary tags
-        if (filter === 'vegetarian' && recipe.title.toLowerCase().includes('vegetal')) return true;
+        if (filter === 'vegetarian' && recipe.tags.includes('vegetariano')) return true;
         if (filter === 'gluten-free' && !recipe.title.toLowerCase().includes('massa')) return true;
         return false;
       });
@@ -209,7 +210,7 @@ export default function RecipesPage() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <Input
               type="text"
-              placeholder="Buscar receitas..."
+              placeholder="Buscar receitas por nome, ingrediente ou categoria..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-12 h-14 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-gray-200 dark:border-gray-700 text-lg"
@@ -263,7 +264,7 @@ export default function RecipesPage() {
           )}
         </div>
 
-        {/* Ingredients Match Banner */}
+        {/* Ingredients Match Banner - Only show if user has ingredients */}
         {ingredients.length > 0 && (
           <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-6 mb-8 shadow-xl">
             <div className="flex items-start gap-4">
@@ -275,8 +276,35 @@ export default function RecipesPage() {
                   Receitas Personalizadas
                 </h3>
                 <p className="text-white/90 text-sm">
-                  Encontramos {filteredRecipes.length} receitas que você pode fazer com seus {ingredients.length} ingredientes
+                  Você tem {ingredients.length} ingredientes no inventário. Explore receitas que pode fazer!
                 </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Info Banner - Show when no ingredients */}
+        {ingredients.length === 0 && (
+          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-6 mb-8 shadow-xl">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-white/20 backdrop-blur-xl rounded-xl flex items-center justify-center flex-shrink-0">
+                <Search className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white mb-2">
+                  Explore Todas as Receitas
+                </h3>
+                <p className="text-white/90 text-sm mb-3">
+                  Navegue por {recipes.length} receitas deliciosas. Adicione ingredientes ao seu inventário para receber sugestões personalizadas!
+                </p>
+                <Link href="/inventory">
+                  <Button
+                    variant="outline"
+                    className="bg-white/20 hover:bg-white/30 text-white border-white/30 rounded-xl"
+                  >
+                    Adicionar Ingredientes
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -376,13 +404,18 @@ export default function RecipesPage() {
               Nenhuma receita encontrada
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Tente ajustar os filtros ou adicionar mais ingredientes
+              Tente ajustar os filtros ou buscar por outros termos
             </p>
-            <Link href="/scan">
-              <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl">
-                Digitalizar Ingredientes
-              </Button>
-            </Link>
+            <Button 
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedDifficulty('all');
+                setSelectedDietaryFilters([]);
+              }}
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl"
+            >
+              Limpar Filtros
+            </Button>
           </div>
         )}
       </div>

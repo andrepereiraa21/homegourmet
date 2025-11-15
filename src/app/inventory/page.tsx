@@ -96,6 +96,16 @@ export default function InventoryPage() {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
   const [editQuantity, setEditQuantity] = useState<number>(0);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newIngredient, setNewIngredient] = useState({
+    name: '',
+    quantity: 1,
+    unit: 'unidade',
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0
+  });
 
   useEffect(() => {
     // Load from localStorage (will be Supabase in Module 2)
@@ -139,6 +149,39 @@ export default function InventoryPage() {
       setIngredients(updated);
       localStorage.setItem('scannedIngredients', JSON.stringify(updated));
       closeEditModal();
+    }
+  };
+
+  const addManualIngredient = () => {
+    if (newIngredient.name.trim()) {
+      const ingredient: Ingredient = {
+        id: Date.now().toString(),
+        name: newIngredient.name,
+        quantity: newIngredient.quantity,
+        unit: newIngredient.unit,
+        calories: newIngredient.calories,
+        protein: newIngredient.protein,
+        carbs: newIngredient.carbs,
+        fat: newIngredient.fat,
+        detectedAt: new Date(),
+        confidence: 1
+      };
+
+      const updated = [...ingredients, ingredient];
+      setIngredients(updated);
+      localStorage.setItem('scannedIngredients', JSON.stringify(updated));
+      
+      // Reset form
+      setNewIngredient({
+        name: '',
+        quantity: 1,
+        unit: 'unidade',
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0
+      });
+      setShowAddModal(false);
     }
   };
 
@@ -232,104 +275,126 @@ export default function InventoryPage() {
                 Nenhum ingrediente ainda
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Comece digitalizando seus ingredientes com a câmera
+                Comece digitalizando seus ingredientes com a câmera ou adicione manualmente
               </p>
-              <Link href="/scan">
-                <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl">
-                  Digitalizar Agora
+              <div className="flex gap-3 justify-center">
+                <Link href="/scan">
+                  <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl">
+                    Digitalizar Agora
+                  </Button>
+                </Link>
+                <Button 
+                  variant="outline"
+                  onClick={() => setShowAddModal(true)}
+                  className="rounded-xl"
+                >
+                  Adicionar Manualmente
                 </Button>
-              </Link>
+              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {ingredients.map((ingredient) => (
-                <div
-                  key={ingredient.id}
-                  className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 group"
-                >
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-md">
-                      <Image
-                        src={getIngredientImage(ingredient.name)}
-                        alt={ingredient.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 truncate">
-                        {ingredient.name}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {ingredient.quantity} {ingredient.unit}
-                      </p>
-                      {ingredient.confidence && (
-                        <div className="flex items-center gap-2 mt-2">
-                          <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full"
-                              style={{ width: `${ingredient.confidence * 100}%` }}
-                            />
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                {ingredients.map((ingredient) => (
+                  <div
+                    key={ingredient.id}
+                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 group"
+                  >
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-md">
+                        <Image
+                          src={getIngredientImage(ingredient.name)}
+                          alt={ingredient.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 truncate">
+                          {ingredient.name}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {ingredient.quantity} {ingredient.unit}
+                        </p>
+                        {ingredient.confidence && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full"
+                                style={{ width: `${ingredient.confidence * 100}%` }}
+                              />
+                            </div>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {(ingredient.confidence * 100).toFixed(0)}%
+                            </span>
                           </div>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {(ingredient.confidence * 100).toFixed(0)}%
-                          </span>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Nutrition Info */}
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3">
-                      <p className="text-xs text-orange-600 dark:text-orange-400 mb-1">Calorias</p>
-                      <p className="text-lg font-bold text-orange-700 dark:text-orange-300">
-                        {(ingredient.calories * ingredient.quantity).toFixed(0)}
-                      </p>
+                    {/* Nutrition Info */}
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3">
+                        <p className="text-xs text-orange-600 dark:text-orange-400 mb-1">Calorias</p>
+                        <p className="text-lg font-bold text-orange-700 dark:text-orange-300">
+                          {(ingredient.calories * ingredient.quantity).toFixed(0)}
+                        </p>
+                      </div>
+                      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+                        <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">Proteína</p>
+                        <p className="text-lg font-bold text-blue-700 dark:text-blue-300">
+                          {(ingredient.protein * ingredient.quantity).toFixed(1)}g
+                        </p>
+                      </div>
+                      <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3">
+                        <p className="text-xs text-emerald-600 dark:text-emerald-400 mb-1">Carboidratos</p>
+                        <p className="text-lg font-bold text-emerald-700 dark:text-emerald-300">
+                          {(ingredient.carbs * ingredient.quantity).toFixed(1)}g
+                        </p>
+                      </div>
+                      <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
+                        <p className="text-xs text-purple-600 dark:text-purple-400 mb-1">Gorduras</p>
+                        <p className="text-lg font-bold text-purple-700 dark:text-purple-300">
+                          {(ingredient.fat * ingredient.quantity).toFixed(1)}g
+                        </p>
+                      </div>
                     </div>
-                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
-                      <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">Proteína</p>
-                      <p className="text-lg font-bold text-blue-700 dark:text-blue-300">
-                        {(ingredient.protein * ingredient.quantity).toFixed(1)}g
-                      </p>
-                    </div>
-                    <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3">
-                      <p className="text-xs text-emerald-600 dark:text-emerald-400 mb-1">Carboidratos</p>
-                      <p className="text-lg font-bold text-emerald-700 dark:text-emerald-300">
-                        {(ingredient.carbs * ingredient.quantity).toFixed(1)}g
-                      </p>
-                    </div>
-                    <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
-                      <p className="text-xs text-purple-600 dark:text-purple-400 mb-1">Gorduras</p>
-                      <p className="text-lg font-bold text-purple-700 dark:text-purple-300">
-                        {(ingredient.fat * ingredient.quantity).toFixed(1)}g
-                      </p>
-                    </div>
-                  </div>
 
-                  {/* Actions */}
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 rounded-lg border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => openEditModal(ingredient)}
-                    >
-                      <Edit2 className="w-4 h-4 mr-2" />
-                      Editar
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="rounded-lg border-red-300 dark:border-red-600 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                      onClick={() => removeIngredient(ingredient.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    {/* Actions */}
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 rounded-lg border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        onClick={() => openEditModal(ingredient)}
+                      >
+                        <Edit2 className="w-4 h-4 mr-2" />
+                        Editar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-lg border-red-300 dark:border-red-600 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        onClick={() => removeIngredient(ingredient.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+
+              {/* Botão de Adicionar Manualmente - Abaixo da lista */}
+              <div className="flex justify-center">
+                <Button
+                  onClick={() => setShowAddModal(true)}
+                  className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-2xl px-8 py-6 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                >
+                  <Plus className="w-6 h-6 mr-3" />
+                  Adicionar Ingrediente Manualmente
+                </Button>
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -402,6 +467,159 @@ export default function InventoryPage() {
               >
                 <Save className="w-4 h-4 mr-2" />
                 Salvar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Manual Ingredient Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in fade-in slide-in-from-bottom-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                Adicionar Ingrediente
+              </h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                onClick={() => setShowAddModal(false)}
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Nome do Ingrediente *
+                </label>
+                <input
+                  type="text"
+                  value={newIngredient.name}
+                  onChange={(e) => setNewIngredient({...newIngredient, name: e.target.value})}
+                  placeholder="Ex: Tomate, Cebola, Frango..."
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  autoFocus
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Quantidade *
+                  </label>
+                  <input
+                    type="number"
+                    min="0.5"
+                    step="0.5"
+                    value={newIngredient.quantity}
+                    onChange={(e) => setNewIngredient({...newIngredient, quantity: parseFloat(e.target.value) || 1})}
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Unidade *
+                  </label>
+                  <select
+                    value={newIngredient.unit}
+                    onChange={(e) => setNewIngredient({...newIngredient, unit: e.target.value})}
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="unidade">unidade</option>
+                    <option value="g">gramas</option>
+                    <option value="kg">kg</option>
+                    <option value="ml">ml</option>
+                    <option value="L">litros</option>
+                    <option value="xícara">xícara</option>
+                    <option value="colher">colher</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                  Informações Nutricionais (opcional)
+                </p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      Calorias (kcal)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={newIngredient.calories}
+                      onChange={(e) => setNewIngredient({...newIngredient, calories: parseFloat(e.target.value) || 0})}
+                      className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      Proteína (g)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={newIngredient.protein}
+                      onChange={(e) => setNewIngredient({...newIngredient, protein: parseFloat(e.target.value) || 0})}
+                      className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      Carboidratos (g)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={newIngredient.carbs}
+                      onChange={(e) => setNewIngredient({...newIngredient, carbs: parseFloat(e.target.value) || 0})}
+                      className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      Gorduras (g)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={newIngredient.fat}
+                      onChange={(e) => setNewIngredient({...newIngredient, fat: parseFloat(e.target.value) || 0})}
+                      className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1 rounded-xl border-gray-300 dark:border-gray-600"
+                onClick={() => setShowAddModal(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={addManualIngredient}
+                disabled={!newIngredient.name.trim()}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar
               </Button>
             </div>
           </div>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Camera, Package, BookOpen, ShoppingCart, User } from 'lucide-react';
+import { Home, Camera, Package, BookOpen, Crown, User } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export function Navigation() {
@@ -14,7 +14,7 @@ export function Navigation() {
     { href: '/scan', icon: Camera, label: t('scan') },
     { href: '/inventory', icon: Package, label: t('inventory') },
     { href: '/recipes', icon: BookOpen, label: t('recipes') },
-    { href: '/shopping-list', icon: ShoppingCart, label: t('shopping') },
+    { href: '/premium', icon: Crown, label: 'Premium' },
     { href: '/profile', icon: User, label: t('profile') },
   ];
 
@@ -25,6 +25,7 @@ export function Navigation() {
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
+            const isPremium = item.href === '/premium';
             
             return (
               <Link
@@ -32,7 +33,9 @@ export function Navigation() {
                 href={item.href}
                 className={`flex flex-col items-center justify-center gap-0.5 sm:gap-1 transition-all duration-300 ${
                   isActive
-                    ? 'text-emerald-600 dark:text-emerald-400 scale-105'
+                    ? isPremium
+                      ? 'text-amber-600 dark:text-amber-400 scale-105'
+                      : 'text-emerald-600 dark:text-emerald-400 scale-105'
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
                 }`}
               >
