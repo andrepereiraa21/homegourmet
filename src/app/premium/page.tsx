@@ -2,10 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, Plus, Trash2, ChefHat, Crown, Check, X } from 'lucide-react';
+import { ArrowLeft, Calendar, Plus, Trash2, ChefHat, Crown, Check, X, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Navigation } from '@/components/custom/navigation';
-import Image from 'next/image';
 
 interface MealPlan {
   id: string;
@@ -70,6 +69,25 @@ export default function PremiumPage() {
       prev.map(day =>
         day.id === dayId
           ? { ...day, [mealType]: null }
+          : day
+      )
+    );
+  };
+
+  const generateAIMeal = (dayId: string, mealType: 'breakfast' | 'lunch' | 'dinner') => {
+    // Mock AI generation - in real app would call AI API
+    const suggestions = {
+      breakfast: ['Ovos mexidos com torradas', 'Iogurte com granola e frutas', 'Panquecas com mel', 'Aveia com banana'],
+      lunch: ['Bacalhau à Brás', 'Arroz de pato', 'Salmão grelhado com legumes', 'Massa carbonara'],
+      dinner: ['Frango assado com batatas', 'Sopa de legumes', 'Pizza caseira', 'Salada Caesar com frango']
+    };
+    
+    const randomSuggestion = suggestions[mealType][Math.floor(Math.random() * suggestions[mealType].length)];
+    
+    setMealPlan(prev =>
+      prev.map(day =>
+        day.id === dayId
+          ? { ...day, [mealType]: randomSuggestion }
           : day
       )
     );
@@ -170,6 +188,18 @@ export default function PremiumPage() {
                     <Check className="w-5 h-5 text-white" />
                   </div>
                   <div>
+                    <h3 className="text-white font-semibold mb-1">Sem anúncios</h3>
+                    <p className="text-white/80 text-sm">
+                      Experiência premium sem interrupções publicitárias
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <Check className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
                     <h3 className="text-white font-semibold mb-1">Suporte Prioritário</h3>
                     <p className="text-white/80 text-sm">
                       Atendimento prioritário e suporte dedicado
@@ -178,17 +208,33 @@ export default function PremiumPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 items-center">
-                <Button
-                  onClick={() => setIsPremium(true)}
-                  className="bg-white hover:bg-gray-100 text-amber-600 rounded-2xl px-8 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
-                >
-                  <Crown className="w-5 h-5 mr-2" />
-                  Ativar Premium - €4.99/mês
-                </Button>
-                <p className="text-white/90 text-sm">
-                  Cancele a qualquer momento • Sem compromisso
-                </p>
+              <div className="flex flex-col sm:flex-row gap-4 items-start">
+                <div className="flex flex-col sm:flex-row gap-4 w-full">
+                  <div className="flex-1">
+                    <Button
+                      onClick={() => setIsPremium(true)}
+                      className="w-full bg-white hover:bg-gray-100 text-amber-600 rounded-2xl px-8 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                    >
+                      <Crown className="w-5 h-5 mr-2" />
+                      Ativar Premium - €4.99/mês
+                    </Button>
+                    <p className="text-white/70 text-xs mt-2 text-center">
+                      Cancele a qualquer momento
+                    </p>
+                  </div>
+                  <div className="flex-1">
+                    <Button
+                      onClick={() => setIsPremium(true)}
+                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-2xl px-8 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                    >
+                      <Crown className="w-5 h-5 mr-2" />
+                      Premium Anual - €49.99/ano
+                    </Button>
+                    <p className="text-white/70 text-xs mt-2 text-center">
+                      Economize 17% • 2 meses grátis
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -290,10 +336,26 @@ export default function PremiumPage() {
               key={day.id}
               className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700"
             >
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-amber-500" />
-                {day.day}
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-amber-500" />
+                  {day.day}
+                </h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 rounded-xl"
+                  onClick={() => {
+                    // Generate AI meals for all empty slots
+                    if (!day.breakfast) generateAIMeal(day.id, 'breakfast');
+                    if (!day.lunch) generateAIMeal(day.id, 'lunch');
+                    if (!day.dinner) generateAIMeal(day.id, 'dinner');
+                  }}
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Gerar com IA
+                </Button>
+              </div>
 
               <div className="grid md:grid-cols-3 gap-4">
                 {/* Breakfast */}

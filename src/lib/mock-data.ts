@@ -327,5 +327,434 @@ export const mockRecipes: Recipe[] = [
       'Sirva com batatas fritas'
     ],
     tags: ['português', 'carne', 'molho']
+  },
+  // SOBREMESAS
+  {
+    id: '11',
+    title: 'Mousse de Chocolate',
+    description: 'Sobremesa cremosa e aerada de chocolate negro',
+    imageUrl: 'https://images.unsplash.com/photo-1541599468348-e96984315921?w=800&h=600&fit=crop',
+    prepTime: 20,
+    difficulty: 'easy',
+    servings: 6,
+    calories: 320,
+    ingredients: [
+      { name: 'Chocolate negro', quantity: 200, unit: 'g' },
+      { name: 'Ovos', quantity: 4, unit: 'unidades' },
+      { name: 'Açúcar', quantity: 80, unit: 'g' },
+      { name: 'Natas', quantity: 200, unit: 'ml' },
+      { name: 'Manteiga', quantity: 30, unit: 'g' }
+    ],
+    instructions: [
+      'Derreta o chocolate com a manteiga em banho-maria',
+      'Separe as claras das gemas',
+      'Bata as claras em castelo com metade do açúcar',
+      'Bata as gemas com o restante açúcar até ficarem cremosas',
+      'Misture as gemas ao chocolate derretido',
+      'Bata as natas até ficarem firmes',
+      'Incorpore delicadamente as claras e as natas ao chocolate',
+      'Leve ao frigorífico por 3 horas'
+    ],
+    tags: ['sobremesa', 'chocolate', 'doce']
+  },
+  {
+    id: '12',
+    title: 'Tiramisu',
+    description: 'Sobremesa italiana com café, mascarpone e cacau',
+    imageUrl: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=800&h=600&fit=crop',
+    prepTime: 30,
+    difficulty: 'medium',
+    servings: 8,
+    calories: 380,
+    ingredients: [
+      { name: 'Mascarpone', quantity: 500, unit: 'g' },
+      { name: 'Ovos', quantity: 4, unit: 'unidades' },
+      { name: 'Açúcar', quantity: 100, unit: 'g' },
+      { name: 'Café expresso', quantity: 300, unit: 'ml' },
+      { name: 'Bolachas champanhe', quantity: 300, unit: 'g' },
+      { name: 'Cacau em pó', quantity: 50, unit: 'g' },
+      { name: 'Marsala', quantity: 50, unit: 'ml', optional: true }
+    ],
+    instructions: [
+      'Separe as claras das gemas',
+      'Bata as gemas com açúcar até ficarem cremosas',
+      'Adicione o mascarpone e misture bem',
+      'Bata as claras em castelo e incorpore ao creme',
+      'Prepare café forte e deixe arrefecer',
+      'Molhe as bolachas no café rapidamente',
+      'Monte camadas alternadas de bolachas e creme',
+      'Polvilhe com cacau e leve ao frigorífico por 4 horas'
+    ],
+    tags: ['sobremesa', 'italiano', 'café']
+  },
+  {
+    id: '13',
+    title: 'Pudim Flan',
+    description: 'Pudim cremoso com caramelo',
+    imageUrl: 'https://images.unsplash.com/photo-1587314168485-3236d6710814?w=800&h=600&fit=crop',
+    prepTime: 60,
+    difficulty: 'medium',
+    servings: 8,
+    calories: 280,
+    ingredients: [
+      { name: 'Leite', quantity: 1, unit: 'litro' },
+      { name: 'Ovos', quantity: 6, unit: 'unidades' },
+      { name: 'Açúcar', quantity: 250, unit: 'g' },
+      { name: 'Baunilha', quantity: 1, unit: 'vagem' }
+    ],
+    instructions: [
+      'Faça caramelo com 150g de açúcar e cubra a forma',
+      'Aqueça o leite com a baunilha',
+      'Bata os ovos com o restante açúcar',
+      'Adicione o leite morno aos ovos',
+      'Coe e despeje na forma caramelizada',
+      'Cozinhe em banho-maria no forno a 180°C por 50 minutos',
+      'Deixe arrefecer e desenforme'
+    ],
+    tags: ['sobremesa', 'pudim', 'caramelo']
+  },
+  {
+    id: '14',
+    title: 'Bolo de Chocolate',
+    description: 'Bolo húmido e intenso de chocolate',
+    imageUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&h=600&fit=crop',
+    prepTime: 50,
+    difficulty: 'easy',
+    servings: 10,
+    calories: 420,
+    ingredients: [
+      { name: 'Chocolate negro', quantity: 200, unit: 'g' },
+      { name: 'Manteiga', quantity: 200, unit: 'g' },
+      { name: 'Açúcar', quantity: 200, unit: 'g' },
+      { name: 'Ovos', quantity: 4, unit: 'unidades' },
+      { name: 'Farinha', quantity: 150, unit: 'g' },
+      { name: 'Fermento', quantity: 1, unit: 'colher de chá' },
+      { name: 'Cacau em pó', quantity: 50, unit: 'g' }
+    ],
+    instructions: [
+      'Derreta o chocolate com a manteiga',
+      'Bata os ovos com o açúcar',
+      'Adicione o chocolate derretido',
+      'Junte a farinha, cacau e fermento peneirados',
+      'Despeje numa forma untada',
+      'Asse a 180°C por 35-40 minutos',
+      'Deixe arrefecer antes de desenformar'
+    ],
+    tags: ['sobremesa', 'bolo', 'chocolate']
+  },
+  {
+    id: '15',
+    title: 'Cheesecake de Frutos Vermelhos',
+    description: 'Tarte cremosa de queijo com cobertura de frutos vermelhos',
+    imageUrl: 'https://images.unsplash.com/photo-1533134242820-b4f7a6e5e3b1?w=800&h=600&fit=crop',
+    prepTime: 45,
+    difficulty: 'medium',
+    servings: 10,
+    calories: 380,
+    ingredients: [
+      { name: 'Queijo creme', quantity: 600, unit: 'g' },
+      { name: 'Açúcar', quantity: 150, unit: 'g' },
+      { name: 'Ovos', quantity: 3, unit: 'unidades' },
+      { name: 'Natas', quantity: 200, unit: 'ml' },
+      { name: 'Bolachas maria', quantity: 200, unit: 'g' },
+      { name: 'Manteiga', quantity: 100, unit: 'g' },
+      { name: 'Frutos vermelhos', quantity: 300, unit: 'g' }
+    ],
+    instructions: [
+      'Triture as bolachas e misture com manteiga derretida',
+      'Forre o fundo da forma e leve ao frigorífico',
+      'Bata o queijo creme com açúcar',
+      'Adicione os ovos um a um',
+      'Junte as natas e misture',
+      'Despeje sobre a base de bolachas',
+      'Asse a 160°C por 50 minutos',
+      'Deixe arrefecer e cubra com frutos vermelhos'
+    ],
+    tags: ['sobremesa', 'cheesecake', 'frutos']
+  },
+  {
+    id: '16',
+    title: 'Arroz Doce',
+    description: 'Sobremesa tradicional portuguesa cremosa com canela',
+    imageUrl: 'https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae?w=800&h=600&fit=crop',
+    prepTime: 40,
+    difficulty: 'easy',
+    servings: 6,
+    calories: 280,
+    ingredients: [
+      { name: 'Arroz', quantity: 200, unit: 'g' },
+      { name: 'Leite', quantity: 1, unit: 'litro' },
+      { name: 'Açúcar', quantity: 150, unit: 'g' },
+      { name: 'Gemas', quantity: 4, unit: 'unidades' },
+      { name: 'Casca de limão', quantity: 1, unit: 'unidade' },
+      { name: 'Canela', quantity: 2, unit: 'paus' }
+    ],
+    instructions: [
+      'Cozinhe o arroz em água com casca de limão e canela',
+      'Adicione o leite aos poucos',
+      'Junte o açúcar e cozinhe até engrossar',
+      'Retire do lume e adicione as gemas batidas',
+      'Mexa bem e distribua em taças',
+      'Polvilhe com canela em pó',
+      'Sirva frio'
+    ],
+    tags: ['sobremesa', 'português', 'arroz']
+  },
+  {
+    id: '17',
+    title: 'Tarte de Maçã',
+    description: 'Tarte clássica com maçãs caramelizadas e canela',
+    imageUrl: 'https://images.unsplash.com/photo-1535920527002-b35e96722eb9?w=800&h=600&fit=crop',
+    prepTime: 60,
+    difficulty: 'medium',
+    servings: 8,
+    calories: 320,
+    ingredients: [
+      { name: 'Massa quebrada', quantity: 1, unit: 'rolo' },
+      { name: 'Maçãs', quantity: 6, unit: 'unidades' },
+      { name: 'Açúcar', quantity: 100, unit: 'g' },
+      { name: 'Manteiga', quantity: 50, unit: 'g' },
+      { name: 'Canela', quantity: 1, unit: 'colher de chá' },
+      { name: 'Sumo de limão', quantity: 2, unit: 'colheres' }
+    ],
+    instructions: [
+      'Forre uma forma com a massa quebrada',
+      'Descasque e corte as maçãs em fatias',
+      'Salteie as maçãs com manteiga, açúcar e canela',
+      'Adicione o sumo de limão',
+      'Disponha as maçãs sobre a massa',
+      'Asse a 180°C por 40 minutos',
+      'Sirva morno com gelado de baunilha'
+    ],
+    tags: ['sobremesa', 'tarte', 'maçã']
+  },
+  {
+    id: '18',
+    title: 'Panna Cotta',
+    description: 'Sobremesa italiana cremosa com cobertura de frutos',
+    imageUrl: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&h=600&fit=crop',
+    prepTime: 25,
+    difficulty: 'easy',
+    servings: 6,
+    calories: 280,
+    ingredients: [
+      { name: 'Natas', quantity: 500, unit: 'ml' },
+      { name: 'Açúcar', quantity: 80, unit: 'g' },
+      { name: 'Gelatina', quantity: 3, unit: 'folhas' },
+      { name: 'Baunilha', quantity: 1, unit: 'vagem' },
+      { name: 'Frutos vermelhos', quantity: 200, unit: 'g' }
+    ],
+    instructions: [
+      'Hidrate a gelatina em água fria',
+      'Aqueça as natas com açúcar e baunilha',
+      'Retire do lume e adicione a gelatina escorrida',
+      'Mexa até dissolver completamente',
+      'Distribua por taças',
+      'Leve ao frigorífico por 4 horas',
+      'Sirva com frutos vermelhos'
+    ],
+    tags: ['sobremesa', 'italiano', 'cremoso']
+  },
+  {
+    id: '19',
+    title: 'Brownies',
+    description: 'Quadrados de chocolate densos e intensos',
+    imageUrl: 'https://images.unsplash.com/photo-1607920591413-4ec007e70023?w=800&h=600&fit=crop',
+    prepTime: 35,
+    difficulty: 'easy',
+    servings: 12,
+    calories: 380,
+    ingredients: [
+      { name: 'Chocolate negro', quantity: 200, unit: 'g' },
+      { name: 'Manteiga', quantity: 150, unit: 'g' },
+      { name: 'Açúcar', quantity: 200, unit: 'g' },
+      { name: 'Ovos', quantity: 3, unit: 'unidades' },
+      { name: 'Farinha', quantity: 100, unit: 'g' },
+      { name: 'Cacau em pó', quantity: 30, unit: 'g' },
+      { name: 'Nozes', quantity: 100, unit: 'g', optional: true }
+    ],
+    instructions: [
+      'Derreta o chocolate com a manteiga',
+      'Bata os ovos com o açúcar',
+      'Adicione o chocolate derretido',
+      'Junte a farinha e cacau peneirados',
+      'Adicione as nozes picadas',
+      'Despeje numa forma forrada',
+      'Asse a 180°C por 25 minutos',
+      'Corte em quadrados após arrefecer'
+    ],
+    tags: ['sobremesa', 'chocolate', 'americano']
+  },
+  {
+    id: '20',
+    title: 'Leite Creme',
+    description: 'Creme tradicional português queimado com açúcar',
+    imageUrl: 'https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?w=800&h=600&fit=crop',
+    prepTime: 35,
+    difficulty: 'medium',
+    servings: 6,
+    calories: 320,
+    ingredients: [
+      { name: 'Leite', quantity: 750, unit: 'ml' },
+      { name: 'Gemas', quantity: 8, unit: 'unidades' },
+      { name: 'Açúcar', quantity: 150, unit: 'g' },
+      { name: 'Farinha Maizena', quantity: 40, unit: 'g' },
+      { name: 'Casca de limão', quantity: 1, unit: 'unidade' },
+      { name: 'Açúcar para queimar', quantity: 100, unit: 'g' }
+    ],
+    instructions: [
+      'Aqueça o leite com a casca de limão',
+      'Bata as gemas com açúcar e maizena',
+      'Adicione o leite quente aos poucos',
+      'Leve ao lume mexendo sempre até engrossar',
+      'Distribua por taças',
+      'Deixe arrefecer',
+      'Polvilhe com açúcar e queime com maçarico',
+      'Sirva frio'
+    ],
+    tags: ['sobremesa', 'português', 'creme']
+  },
+  {
+    id: '21',
+    title: 'Tarte de Limão',
+    description: 'Tarte refrescante com creme de limão e merengue',
+    imageUrl: 'https://images.unsplash.com/photo-1519915212116-7cfef71f1d3e?w=800&h=600&fit=crop',
+    prepTime: 50,
+    difficulty: 'medium',
+    servings: 8,
+    calories: 340,
+    ingredients: [
+      { name: 'Massa quebrada', quantity: 1, unit: 'rolo' },
+      { name: 'Limões', quantity: 4, unit: 'unidades' },
+      { name: 'Açúcar', quantity: 200, unit: 'g' },
+      { name: 'Ovos', quantity: 4, unit: 'unidades' },
+      { name: 'Manteiga', quantity: 100, unit: 'g' },
+      { name: 'Natas', quantity: 100, unit: 'ml' }
+    ],
+    instructions: [
+      'Forre uma forma com massa quebrada e asse em branco',
+      'Rale a casca e esprema os limões',
+      'Bata ovos com açúcar',
+      'Adicione sumo e raspa de limão',
+      'Cozinhe em banho-maria até engrossar',
+      'Adicione manteiga e natas',
+      'Despeje sobre a base assada',
+      'Leve ao frigorífico por 3 horas'
+    ],
+    tags: ['sobremesa', 'tarte', 'limão']
+  },
+  {
+    id: '22',
+    title: 'Salame de Chocolate',
+    description: 'Sobremesa fria com bolachas e chocolate',
+    imageUrl: 'https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=800&h=600&fit=crop',
+    prepTime: 20,
+    difficulty: 'easy',
+    servings: 8,
+    calories: 380,
+    ingredients: [
+      { name: 'Chocolate negro', quantity: 200, unit: 'g' },
+      { name: 'Manteiga', quantity: 150, unit: 'g' },
+      { name: 'Açúcar', quantity: 100, unit: 'g' },
+      { name: 'Ovos', quantity: 2, unit: 'unidades' },
+      { name: 'Bolachas maria', quantity: 200, unit: 'g' },
+      { name: 'Nozes', quantity: 100, unit: 'g', optional: true }
+    ],
+    instructions: [
+      'Derreta o chocolate com a manteiga',
+      'Adicione o açúcar e os ovos batidos',
+      'Parta as bolachas em pedaços',
+      'Misture as bolachas e nozes ao chocolate',
+      'Coloque sobre papel filme em forma de cilindro',
+      'Enrole bem apertado',
+      'Leve ao frigorífico por 4 horas',
+      'Corte em rodelas para servir'
+    ],
+    tags: ['sobremesa', 'chocolate', 'frio']
+  },
+  {
+    id: '23',
+    title: 'Bolo de Cenoura com Cobertura',
+    description: 'Bolo fofo de cenoura com cobertura de chocolate',
+    imageUrl: 'https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=800&h=600&fit=crop',
+    prepTime: 50,
+    difficulty: 'easy',
+    servings: 10,
+    calories: 360,
+    ingredients: [
+      { name: 'Cenouras', quantity: 3, unit: 'unidades' },
+      { name: 'Ovos', quantity: 3, unit: 'unidades' },
+      { name: 'Açúcar', quantity: 200, unit: 'g' },
+      { name: 'Óleo', quantity: 150, unit: 'ml' },
+      { name: 'Farinha', quantity: 250, unit: 'g' },
+      { name: 'Fermento', quantity: 1, unit: 'colher de sopa' },
+      { name: 'Chocolate em pó', quantity: 100, unit: 'g' },
+      { name: 'Manteiga', quantity: 50, unit: 'g' }
+    ],
+    instructions: [
+      'Bata as cenouras, ovos, açúcar e óleo no liquidificador',
+      'Adicione a farinha e fermento',
+      'Despeje numa forma untada',
+      'Asse a 180°C por 40 minutos',
+      'Prepare cobertura derretendo chocolate com manteiga',
+      'Cubra o bolo ainda morno',
+      'Deixe arrefecer antes de servir'
+    ],
+    tags: ['sobremesa', 'bolo', 'cenoura']
+  },
+  {
+    id: '24',
+    title: 'Pavlova',
+    description: 'Merengue crocante com natas e frutos frescos',
+    imageUrl: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=800&h=600&fit=crop',
+    prepTime: 90,
+    difficulty: 'hard',
+    servings: 8,
+    calories: 320,
+    ingredients: [
+      { name: 'Claras', quantity: 4, unit: 'unidades' },
+      { name: 'Açúcar', quantity: 250, unit: 'g' },
+      { name: 'Vinagre', quantity: 1, unit: 'colher de chá' },
+      { name: 'Maizena', quantity: 1, unit: 'colher de chá' },
+      { name: 'Natas', quantity: 300, unit: 'ml' },
+      { name: 'Frutos vermelhos', quantity: 300, unit: 'g' },
+      { name: 'Kiwi', quantity: 2, unit: 'unidades' }
+    ],
+    instructions: [
+      'Bata as claras em castelo',
+      'Adicione o açúcar aos poucos',
+      'Junte vinagre e maizena',
+      'Forme um disco numa assadeira',
+      'Asse a 120°C por 90 minutos',
+      'Deixe arrefecer no forno desligado',
+      'Cubra com natas batidas e frutos',
+      'Sirva imediatamente'
+    ],
+    tags: ['sobremesa', 'merengue', 'frutos']
+  },
+  {
+    id: '25',
+    title: 'Serradura',
+    description: 'Sobremesa portuguesa com natas e bolacha maria',
+    imageUrl: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=800&h=600&fit=crop',
+    prepTime: 20,
+    difficulty: 'easy',
+    servings: 6,
+    calories: 380,
+    ingredients: [
+      { name: 'Natas', quantity: 400, unit: 'ml' },
+      { name: 'Leite condensado', quantity: 1, unit: 'lata' },
+      { name: 'Bolachas maria', quantity: 200, unit: 'g' }
+    ],
+    instructions: [
+      'Bata as natas até ficarem firmes',
+      'Adicione o leite condensado',
+      'Triture as bolachas até ficarem em pó',
+      'Monte camadas alternadas de creme e bolacha',
+      'Termine com uma camada de bolacha',
+      'Leve ao frigorífico por 4 horas',
+      'Sirva bem frio'
+    ],
+    tags: ['sobremesa', 'português', 'fácil']
   }
 ];

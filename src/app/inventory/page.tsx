@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Plus, Trash2, Edit2, TrendingUp, Flame, Activity, X, Save } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Edit2, TrendingUp, Flame, Activity, X, Save, Crown, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Navigation } from '@/components/custom/navigation';
 import { Ingredient } from '@/lib/types';
@@ -97,14 +97,11 @@ export default function InventoryPage() {
   const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
   const [editQuantity, setEditQuantity] = useState<number>(0);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isPremium, setIsPremium] = useState(false); // Estado para verificar se é premium
   const [newIngredient, setNewIngredient] = useState({
     name: '',
     quantity: 1,
-    unit: 'unidade',
-    calories: 0,
-    protein: 0,
-    carbs: 0,
-    fat: 0
+    unit: 'unidade'
   });
 
   useEffect(() => {
@@ -116,6 +113,10 @@ export default function InventoryPage() {
       // Use mock data for demo
       setIngredients(mockIngredients);
     }
+    
+    // Check premium status
+    const premiumStatus = localStorage.getItem('isPremium');
+    setIsPremium(premiumStatus === 'true');
   }, []);
 
   const totalCalories = ingredients.reduce((sum, ing) => sum + ing.calories * ing.quantity, 0);
@@ -159,10 +160,10 @@ export default function InventoryPage() {
         name: newIngredient.name,
         quantity: newIngredient.quantity,
         unit: newIngredient.unit,
-        calories: newIngredient.calories,
-        protein: newIngredient.protein,
-        carbs: newIngredient.carbs,
-        fat: newIngredient.fat,
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
         detectedAt: new Date(),
         confidence: 1
       };
@@ -175,11 +176,7 @@ export default function InventoryPage() {
       setNewIngredient({
         name: '',
         quantity: 1,
-        unit: 'unidade',
-        calories: 0,
-        protein: 0,
-        carbs: 0,
-        fat: 0
+        unit: 'unidade'
       });
       setShowAddModal(false);
     }
@@ -205,6 +202,7 @@ export default function InventoryPage() {
           <Link href="/scan">
             <Button
               size="icon"
+              title="Digitalizar ingredientes com a câmera"
               className="rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg"
             >
               <Plus className="w-6 h-6" />
@@ -212,44 +210,68 @@ export default function InventoryPage() {
           </Link>
         </div>
 
-        {/* Nutrition Summary */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-6 shadow-xl">
-            <div className="flex items-center gap-3 mb-2">
-              <Flame className="w-6 h-6 text-white" />
-              <span className="text-white/90 text-sm font-medium">Calorias</span>
+        {/* Nutrition Summary - Premium Only */}
+        {isPremium ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-6 shadow-xl">
+              <div className="flex items-center gap-3 mb-2">
+                <Flame className="w-6 h-6 text-white" />
+                <span className="text-white/90 text-sm font-medium">Calorias</span>
+              </div>
+              <p className="text-3xl font-bold text-white">{totalCalories.toFixed(0)}</p>
+              <p className="text-white/80 text-xs mt-1">kcal totais</p>
             </div>
-            <p className="text-3xl font-bold text-white">{totalCalories.toFixed(0)}</p>
-            <p className="text-white/80 text-xs mt-1">kcal totais</p>
-          </div>
 
-          <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-6 shadow-xl">
-            <div className="flex items-center gap-3 mb-2">
-              <Activity className="w-6 h-6 text-white" />
-              <span className="text-white/90 text-sm font-medium">Proteína</span>
+            <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-6 shadow-xl">
+              <div className="flex items-center gap-3 mb-2">
+                <Activity className="w-6 h-6 text-white" />
+                <span className="text-white/90 text-sm font-medium">Proteína</span>
+              </div>
+              <p className="text-3xl font-bold text-white">{totalProtein.toFixed(1)}</p>
+              <p className="text-white/80 text-xs mt-1">gramas</p>
             </div>
-            <p className="text-3xl font-bold text-white">{totalProtein.toFixed(1)}</p>
-            <p className="text-white/80 text-xs mt-1">gramas</p>
-          </div>
 
-          <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 shadow-xl">
-            <div className="flex items-center gap-3 mb-2">
-              <TrendingUp className="w-6 h-6 text-white" />
-              <span className="text-white/90 text-sm font-medium">Carboidratos</span>
+            <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 shadow-xl">
+              <div className="flex items-center gap-3 mb-2">
+                <TrendingUp className="w-6 h-6 text-white" />
+                <span className="text-white/90 text-sm font-medium">Carboidratos</span>
+              </div>
+              <p className="text-3xl font-bold text-white">{totalCarbs.toFixed(1)}</p>
+              <p className="text-white/80 text-xs mt-1">gramas</p>
             </div>
-            <p className="text-3xl font-bold text-white">{totalCarbs.toFixed(1)}</p>
-            <p className="text-white/80 text-xs mt-1">gramas</p>
-          </div>
 
-          <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-6 shadow-xl">
-            <div className="flex items-center gap-3 mb-2">
-              <Activity className="w-6 h-6 text-white" />
-              <span className="text-white/90 text-sm font-medium">Gorduras</span>
+            <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-6 shadow-xl">
+              <div className="flex items-center gap-3 mb-2">
+                <Activity className="w-6 h-6 text-white" />
+                <span className="text-white/90 text-sm font-medium">Gorduras</span>
+              </div>
+              <p className="text-3xl font-bold text-white">{totalFat.toFixed(1)}</p>
+              <p className="text-white/80 text-xs mt-1">gramas</p>
             </div>
-            <p className="text-3xl font-bold text-white">{totalFat.toFixed(1)}</p>
-            <p className="text-white/80 text-xs mt-1">gramas</p>
           </div>
-        </div>
+        ) : (
+          <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl p-6 mb-8 shadow-xl">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-white/20 backdrop-blur-xl rounded-xl flex items-center justify-center flex-shrink-0">
+                <Crown className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-white mb-2">
+                  Informações Nutricionais Premium
+                </h3>
+                <p className="text-white/90 text-sm mb-4">
+                  Desbloqueie informações detalhadas sobre calorias e macronutrientes dos seus ingredientes
+                </p>
+                <Link href="/premium">
+                  <Button className="bg-white hover:bg-gray-100 text-amber-600 rounded-xl font-semibold">
+                    <Crown className="w-4 h-4 mr-2" />
+                    Ativar Premium
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Ingredients List */}
         <div className="mb-8">
@@ -332,33 +354,42 @@ export default function InventoryPage() {
                       </div>
                     </div>
 
-                    {/* Nutrition Info */}
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                      <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3">
-                        <p className="text-xs text-orange-600 dark:text-orange-400 mb-1">Calorias</p>
-                        <p className="text-lg font-bold text-orange-700 dark:text-orange-300">
-                          {(ingredient.calories * ingredient.quantity).toFixed(0)}
-                        </p>
+                    {/* Nutrition Info - Premium Only */}
+                    {isPremium ? (
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3">
+                          <p className="text-xs text-orange-600 dark:text-orange-400 mb-1">Calorias</p>
+                          <p className="text-lg font-bold text-orange-700 dark:text-orange-300">
+                            {(ingredient.calories * ingredient.quantity).toFixed(0)}
+                          </p>
+                        </div>
+                        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+                          <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">Proteína</p>
+                          <p className="text-lg font-bold text-blue-700 dark:text-blue-300">
+                            {(ingredient.protein * ingredient.quantity).toFixed(1)}g
+                          </p>
+                        </div>
+                        <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3">
+                          <p className="text-xs text-emerald-600 dark:text-emerald-400 mb-1">Carboidratos</p>
+                          <p className="text-lg font-bold text-emerald-700 dark:text-emerald-300">
+                            {(ingredient.carbs * ingredient.quantity).toFixed(1)}g
+                          </p>
+                        </div>
+                        <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
+                          <p className="text-xs text-purple-600 dark:text-purple-400 mb-1">Gorduras</p>
+                          <p className="text-lg font-bold text-purple-700 dark:text-purple-300">
+                            {(ingredient.fat * ingredient.quantity).toFixed(1)}g
+                          </p>
+                        </div>
                       </div>
-                      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
-                        <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">Proteína</p>
-                        <p className="text-lg font-bold text-blue-700 dark:text-blue-300">
-                          {(ingredient.protein * ingredient.quantity).toFixed(1)}g
-                        </p>
+                    ) : (
+                      <div className="bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg p-4 mb-4 border border-amber-200 dark:border-amber-800">
+                        <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                          <Lock className="w-4 h-4" />
+                          <p className="text-xs font-medium">Informações nutricionais disponíveis no Premium</p>
+                        </div>
                       </div>
-                      <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3">
-                        <p className="text-xs text-emerald-600 dark:text-emerald-400 mb-1">Carboidratos</p>
-                        <p className="text-lg font-bold text-emerald-700 dark:text-emerald-300">
-                          {(ingredient.carbs * ingredient.quantity).toFixed(1)}g
-                        </p>
-                      </div>
-                      <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
-                        <p className="text-xs text-purple-600 dark:text-purple-400 mb-1">Gorduras</p>
-                        <p className="text-lg font-bold text-purple-700 dark:text-purple-300">
-                          {(ingredient.fat * ingredient.quantity).toFixed(1)}g
-                        </p>
-                      </div>
-                    </div>
+                    )}
 
                     {/* Actions */}
                     <div className="flex gap-2">
@@ -473,10 +504,10 @@ export default function InventoryPage() {
         </div>
       )}
 
-      {/* Add Manual Ingredient Modal */}
+      {/* Add Manual Ingredient Modal - Simplificado */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in fade-in slide-in-from-bottom-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in fade-in slide-in-from-bottom-4">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 Adicionar Ingrediente
@@ -538,69 +569,6 @@ export default function InventoryPage() {
                     <option value="xícara">xícara</option>
                     <option value="colher">colher</option>
                   </select>
-                </div>
-              </div>
-
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                  Informações Nutricionais (opcional)
-                </p>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                      Calorias (kcal)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={newIngredient.calories}
-                      onChange={(e) => setNewIngredient({...newIngredient, calories: parseFloat(e.target.value) || 0})}
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                      Proteína (g)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={newIngredient.protein}
-                      onChange={(e) => setNewIngredient({...newIngredient, protein: parseFloat(e.target.value) || 0})}
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                      Carboidratos (g)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={newIngredient.carbs}
-                      onChange={(e) => setNewIngredient({...newIngredient, carbs: parseFloat(e.target.value) || 0})}
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                      Gorduras (g)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={newIngredient.fat}
-                      onChange={(e) => setNewIngredient({...newIngredient, fat: parseFloat(e.target.value) || 0})}
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-                    />
-                  </div>
                 </div>
               </div>
             </div>

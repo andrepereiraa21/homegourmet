@@ -15,6 +15,7 @@ export default function RecipesPage() {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [selectedDietaryFilters, setSelectedDietaryFilters] = useState<string[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -28,6 +29,13 @@ export default function RecipesPage() {
     { id: 'low-carb', label: 'Low Carb', emoji: '🥩' },
     { id: 'keto', label: 'Keto', emoji: '🥑' },
     { id: 'paleo', label: 'Paleo', emoji: '🍖' },
+  ];
+
+  const categories = [
+    { value: 'all', label: 'Todas', emoji: '🍽️' },
+    { value: 'sobremesas', label: 'Sobremesas', emoji: '🍰' },
+    { value: 'principais', label: 'Principais', emoji: '🍖' },
+    { value: 'sopas', label: 'Sopas', emoji: '🥣' },
   ];
 
   useEffect(() => {
@@ -96,6 +104,12 @@ export default function RecipesPage() {
                          recipe.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesDifficulty = selectedDifficulty === 'all' || recipe.difficulty === selectedDifficulty;
     
+    // Category filter
+    const matchesCategory = selectedCategory === 'all' || 
+      (selectedCategory === 'sobremesas' && recipe.tags.includes('sobremesa')) ||
+      (selectedCategory === 'principais' && (recipe.tags.includes('carne') || recipe.tags.includes('peixe') || recipe.tags.includes('pato') || recipe.tags.includes('bacalhau'))) ||
+      (selectedCategory === 'sopas' && recipe.tags.includes('sopa'));
+    
     // Dietary filters (mock implementation - in real app would check recipe tags)
     const matchesDietary = selectedDietaryFilters.length === 0 || 
       selectedDietaryFilters.some(filter => {
@@ -105,7 +119,7 @@ export default function RecipesPage() {
         return false;
       });
     
-    return matchesSearch && matchesDifficulty && matchesDietary;
+    return matchesSearch && matchesDifficulty && matchesCategory && matchesDietary;
   });
 
   return (
@@ -217,6 +231,26 @@ export default function RecipesPage() {
             />
           </div>
 
+          {/* Category Tabs */}
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {categories.map((category) => (
+              <Button
+                key={category.value}
+                variant={selectedCategory === category.value ? 'default' : 'outline'}
+                onClick={() => setSelectedCategory(category.value)}
+                className={`rounded-full whitespace-nowrap ${
+                  selectedCategory === category.value
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white'
+                    : 'border-gray-300 dark:border-gray-600'
+                }`}
+              >
+                <span className="mr-2">{category.emoji}</span>
+                {category.label}
+              </Button>
+            ))}
+          </div>
+
+          {/* Difficulty Filters */}
           <div className="flex gap-2 overflow-x-auto pb-2">
             {[
               { value: 'all', label: 'Todas' },
@@ -230,7 +264,7 @@ export default function RecipesPage() {
                 onClick={() => setSelectedDifficulty(filter.value)}
                 className={`rounded-full whitespace-nowrap ${
                   selectedDifficulty === filter.value
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white'
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white'
                     : 'border-gray-300 dark:border-gray-600'
                 }`}
               >
@@ -295,7 +329,7 @@ export default function RecipesPage() {
                   Explore Todas as Receitas
                 </h3>
                 <p className="text-white/90 text-sm mb-3">
-                  Navegue por {recipes.length} receitas deliciosas. Adicione ingredientes ao seu inventário para receber sugestões personalizadas!
+                  Navegue por receitas deliciosas. Adicione ingredientes ao seu inventário para receber sugestões personalizadas!
                 </p>
                 <Link href="/inventory">
                   <Button
@@ -410,6 +444,7 @@ export default function RecipesPage() {
               onClick={() => {
                 setSearchQuery('');
                 setSelectedDifficulty('all');
+                setSelectedCategory('all');
                 setSelectedDietaryFilters([]);
               }}
               className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl"

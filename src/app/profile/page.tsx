@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, User, Settings, Heart, Clock, ChefHat, Bell, Shield, HelpCircle, Globe } from 'lucide-react';
+import { ArrowLeft, User, Settings, Heart, Clock, ChefHat, Bell, Shield, HelpCircle, Globe, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Navigation } from '@/components/custom/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,6 +11,9 @@ export default function ProfilePage() {
 
   // Obter o nome do usuário dos metadados
   const userName = user?.user_metadata?.name || 'Chef em Casa';
+  
+  // Obter ano de criação da conta
+  const accountYear = user?.created_at ? new Date(user.created_at).getFullYear() : 2024;
 
   if (loading) {
     return (
@@ -57,7 +60,7 @@ export default function ProfilePage() {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white mb-1">{userName}</h2>
-              <p className="text-white/90">Membro desde 2024</p>
+              <p className="text-white/90">Membro desde {accountYear}</p>
             </div>
           </div>
           
@@ -79,6 +82,25 @@ export default function ProfilePage() {
 
         {/* Menu Options */}
         <div className="space-y-4">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <Link href="/profile/premium">
+              <div className="flex items-center gap-4 p-4 hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50 dark:hover:from-amber-900/20 dark:hover:to-orange-900/20 transition-all">
+                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <Crown className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    Premium
+                    <span className="text-xs bg-gradient-to-r from-amber-500 to-orange-500 text-white px-2 py-0.5 rounded-full">
+                      VIP
+                    </span>
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Gerir subscrição e benefícios</p>
+                </div>
+              </div>
+            </Link>
+          </div>
+
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
             <Link href="/profile/favorites">
               <div className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
