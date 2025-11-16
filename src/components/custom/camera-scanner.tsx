@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Camera, X, Check, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Ingredient } from '@/lib/types';
@@ -37,19 +37,25 @@ export function CameraScanner({ onScanComplete }: CameraScannerProps) {
         audio: false
       });
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        await videoRef.current.play();
-      }
-      
       setStream(mediaStream);
       setIsScanning(true);
+      
+      // Wait for next tick to ensure video element is ready
+      setTimeout(() => {
+        if (videoRef.current && mediaStream) {
+          videoRef.current.srcObject = mediaStream;
+          videoRef.current.play().catch(err => {
+            console.error('Error playing video:', err);
+          });
+        }
+      }, 100);
       
       // Simulate AI detection after 2 seconds
       setTimeout(() => {
         setDetectedItems(['Tomate', 'Cebola', 'Alho']);
       }, 2000);
     } catch (error: any) {
+      console.error('Camera error:', error);
       // Handle specific permission errors
       if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
         setPermissionError('Permissão de câmera negada. Por favor, permita o acesso à câmera nas configurações do navegador.');
@@ -137,6 +143,15 @@ export function CameraScanner({ onScanComplete }: CameraScannerProps) {
     startCamera();
   }, [startCamera]);
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [stream]);
+
   // Show permission error
   if (permissionError) {
     return (
@@ -193,19 +208,20 @@ export function CameraScanner({ onScanComplete }: CameraScannerProps) {
   }
 
   return (
-    <div className="relative w-full h-full min-h-[600px] bg-black rounded-3xl overflow-hidden">
+    <div className="relative w-full aspect-video min-h-[500px] bg-black rounded-3xl overflow-hidden shadow-2xl">
       <video
         ref={videoRef}
         autoPlay
         playsInline
         muted
-        className="w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ transform: 'scaleX(-1)' }}
       />
       
       {/* Overlay with detected items */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40">
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 pointer-events-none">
         {/* Top bar */}
-        <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center">
+        <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center pointer-events-auto">
           <div className="flex items-center gap-2 bg-white/20 backdrop-blur-xl px-4 py-2 rounded-full">
             <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
             <span className="text-white text-sm font-medium">Digitalizando...</span>
@@ -222,7 +238,7 @@ export function CameraScanner({ onScanComplete }: CameraScannerProps) {
 
         {/* Detected items */}
         {detectedItems.length > 0 && (
-          <div className="absolute bottom-32 left-0 right-0 px-6">
+          <div className="absolute bottom-6 left-0 right-0 px-6 pointer-events-auto">
             <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
               <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Ingredientes Detectados
