@@ -2,13 +2,19 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Camera, Package, BookOpen, Sparkles, ChefHat, Clock, LogIn, UserPlus } from 'lucide-react';
+import { Camera, Package, BookOpen, Sparkles, ChefHat, Clock, LogIn, UserPlus, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Navigation } from '@/components/custom/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const { user } = useAuth();
+  const router = useRouter();
+
+  const handlePremiumClick = () => {
+    router.push('/profile/premium');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-950 dark:via-gray-900 dark:to-emerald-950/20 pb-20">

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Plus, Trash2, Edit2, TrendingUp, Flame, Activity, X, Save, Crown, Lock } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Edit2, Lock, X, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Navigation } from '@/components/custom/navigation';
 import { Ingredient } from '@/lib/types';
@@ -97,7 +97,7 @@ export default function InventoryPage() {
   const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
   const [editQuantity, setEditQuantity] = useState<number>(0);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [isPremium, setIsPremium] = useState(false); // Estado para verificar se é premium
+  const [isPremium, setIsPremium] = useState(false);
   const [newIngredient, setNewIngredient] = useState({
     name: '',
     quantity: 1,
@@ -105,24 +105,27 @@ export default function InventoryPage() {
   });
 
   useEffect(() => {
-    // Load from localStorage (will be Supabase in Module 2)
+    // Load from localStorage
     const stored = localStorage.getItem('scannedIngredients');
     if (stored) {
       setIngredients(JSON.parse(stored));
     } else {
-      // Use mock data for demo
       setIngredients(mockIngredients);
     }
     
     // Check premium status
     const premiumStatus = localStorage.getItem('isPremium');
     setIsPremium(premiumStatus === 'true');
-  }, []);
 
-  const totalCalories = ingredients.reduce((sum, ing) => sum + ing.calories * ing.quantity, 0);
-  const totalProtein = ingredients.reduce((sum, ing) => sum + ing.protein * ing.quantity, 0);
-  const totalCarbs = ingredients.reduce((sum, ing) => sum + ing.carbs * ing.quantity, 0);
-  const totalFat = ingredients.reduce((sum, ing) => sum + ing.fat * ing.quantity, 0);
+    // Listen for premium status changes
+    const handlePremiumChange = () => {
+      const status = localStorage.getItem('isPremium');
+      setIsPremium(status === 'true');
+    };
+
+    window.addEventListener('premiumStatusChanged', handlePremiumChange);
+    return () => window.removeEventListener('premiumStatusChanged', handlePremiumChange);
+  }, []);
 
   const removeIngredient = (id: string) => {
     const updated = ingredients.filter(ing => ing.id !== id);
@@ -209,69 +212,6 @@ export default function InventoryPage() {
             </Button>
           </Link>
         </div>
-
-        {/* Nutrition Summary - Premium Only */}
-        {isPremium ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-6 shadow-xl">
-              <div className="flex items-center gap-3 mb-2">
-                <Flame className="w-6 h-6 text-white" />
-                <span className="text-white/90 text-sm font-medium">Calorias</span>
-              </div>
-              <p className="text-3xl font-bold text-white">{totalCalories.toFixed(0)}</p>
-              <p className="text-white/80 text-xs mt-1">kcal totais</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-6 shadow-xl">
-              <div className="flex items-center gap-3 mb-2">
-                <Activity className="w-6 h-6 text-white" />
-                <span className="text-white/90 text-sm font-medium">Proteína</span>
-              </div>
-              <p className="text-3xl font-bold text-white">{totalProtein.toFixed(1)}</p>
-              <p className="text-white/80 text-xs mt-1">gramas</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 shadow-xl">
-              <div className="flex items-center gap-3 mb-2">
-                <TrendingUp className="w-6 h-6 text-white" />
-                <span className="text-white/90 text-sm font-medium">Carboidratos</span>
-              </div>
-              <p className="text-3xl font-bold text-white">{totalCarbs.toFixed(1)}</p>
-              <p className="text-white/80 text-xs mt-1">gramas</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-6 shadow-xl">
-              <div className="flex items-center gap-3 mb-2">
-                <Activity className="w-6 h-6 text-white" />
-                <span className="text-white/90 text-sm font-medium">Gorduras</span>
-              </div>
-              <p className="text-3xl font-bold text-white">{totalFat.toFixed(1)}</p>
-              <p className="text-white/80 text-xs mt-1">gramas</p>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl p-6 mb-8 shadow-xl">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-xl rounded-xl flex items-center justify-center flex-shrink-0">
-                <Crown className="w-6 h-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-bold text-white mb-2">
-                  Informações Nutricionais Premium
-                </h3>
-                <p className="text-white/90 text-sm mb-4">
-                  Desbloqueie informações detalhadas sobre calorias e macronutrientes dos seus ingredientes
-                </p>
-                <Link href="/premium">
-                  <Button className="bg-white hover:bg-gray-100 text-amber-600 rounded-xl font-semibold">
-                    <Crown className="w-4 h-4 mr-2" />
-                    Ativar Premium
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Ingredients List */}
         <div className="mb-8">
@@ -504,7 +444,7 @@ export default function InventoryPage() {
         </div>
       )}
 
-      {/* Add Manual Ingredient Modal - Simplificado */}
+      {/* Add Manual Ingredient Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in fade-in slide-in-from-bottom-4">

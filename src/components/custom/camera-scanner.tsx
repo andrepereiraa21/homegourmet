@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
-import { Camera, X, Check, Loader2, AlertCircle } from 'lucide-react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { Camera, X, Check, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Ingredient } from '@/lib/types';
 
@@ -12,10 +12,12 @@ interface CameraScannerProps {
 export function CameraScanner({ onScanComplete }: CameraScannerProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [detectedItems, setDetectedItems] = useState<string[]>([]);
   const [permissionError, setPermissionError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const startCamera = useCallback(async () => {
     try {
@@ -37,19 +39,21 @@ export function CameraScanner({ onScanComplete }: CameraScannerProps) {
         audio: false
       });
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        await videoRef.current.play();
-      }
-      
       setStream(mediaStream);
       setIsScanning(true);
       
-      // Simulate AI detection after 2 seconds
+      // Wait for next tick to ensure video element is ready
       setTimeout(() => {
-        setDetectedItems(['Tomate', 'Cebola', 'Alho']);
-      }, 2000);
+        if (videoRef.current && mediaStream) {
+          videoRef.current.srcObject = mediaStream;
+          videoRef.current.play().catch(err => {
+            console.error('Error playing video:', err);
+          });
+        }
+      }, 100);
+      
     } catch (error: any) {
+      console.error('Camera error:', error);
       // Handle specific permission errors
       if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
         setPermissionError('Permissão de câmera negada. Por favor, permita o acesso à câmera nas configurações do navegador.');
@@ -76,66 +80,143 @@ export function CameraScanner({ onScanComplete }: CameraScannerProps) {
       videoRef.current.srcObject = null;
     }
     setIsScanning(false);
+    setIsAnalyzing(false);
     setDetectedItems([]);
   }, [stream]);
 
-  const confirmScan = useCallback(() => {
+  const captureAndAnalyze = useCallback(async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    
+    setIsAnalyzing(true);
+    
+    try {
+      // Capture frame from video
+      const canvas = canvasRef.current;
+      const video = videoRef.current;
+      
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        throw new Error('Could not get canvas context');
+      }
+      
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Convert canvas to blob
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((b) => {
+          if (b) resolve(b);
+          else reject(new Error('Failed to create blob'));
+        }, 'image/jpeg', 0.95);
+      });
+      
+      // Send to OpenAI Vision API
+      const formData = new FormData();
+      formData.append('image', blob, 'capture.jpg');
+      
+      const response = await fetch('/api/analyze-ingredients', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to analyze image');
+      }
+      
+      const data = await response.json();
+      
+      if (data.ingredients && data.ingredients.length > 0) {
+        setDetectedItems(data.ingredients);
+      } else {
+        // Fallback if no ingredients detected
+        setDetectedItems(['Nenhum ingrediente detectado']);
+      }
+      
+    } catch (error) {
+      console.error('Error analyzing image:', error);
+      // Fallback to mock data on error
+      setDetectedItems(['Erro na detecção - tente novamente']);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, []);
+
+  const confirmScan = useCallback(async () => {
     setIsProcessing(true);
     
-    // Simulate AI processing
-    setTimeout(() => {
-      const mockIngredients: Ingredient[] = [
-        {
-          id: '1',
-          name: 'Tomate',
-          quantity: 3,
-          unit: 'unidades',
-          calories: 22,
-          protein: 1.1,
-          carbs: 4.8,
-          fat: 0.2,
-          imageUrl: 'https://images.unsplash.com/photo-1546470427-227e9e6a4b8b?w=400&h=400&fit=crop',
-          detectedAt: new Date(),
-          confidence: 0.95
+    try {
+      // Get nutritional info for detected ingredients
+      const response = await fetch('/api/get-ingredient-info', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        {
-          id: '2',
-          name: 'Cebola',
-          quantity: 2,
-          unit: 'unidades',
-          calories: 40,
-          protein: 1.1,
-          carbs: 9.3,
-          fat: 0.1,
-          imageUrl: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400&h=400&fit=crop',
-          detectedAt: new Date(),
-          confidence: 0.92
-        },
-        {
-          id: '3',
-          name: 'Alho',
-          quantity: 5,
-          unit: 'dentes',
-          calories: 4,
-          protein: 0.2,
-          carbs: 1,
-          fat: 0,
-          imageUrl: 'https://images.unsplash.com/photo-1588347818036-8fc8d1d6b7b7?w=400&h=400&fit=crop',
-          detectedAt: new Date(),
-          confidence: 0.88
-        }
-      ];
+        body: JSON.stringify({ ingredients: detectedItems }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to get ingredient info');
+      }
+      
+      const data = await response.json();
+      
+      const ingredients: Ingredient[] = data.ingredients.map((item: any, index: number) => ({
+        id: `${Date.now()}-${index}`,
+        name: item.name,
+        quantity: item.quantity || 1,
+        unit: item.unit || 'unidades',
+        calories: item.calories || 0,
+        protein: item.protein || 0,
+        carbs: item.carbs || 0,
+        fat: item.fat || 0,
+        imageUrl: item.imageUrl || '',
+        detectedAt: new Date(),
+        confidence: item.confidence || 0.85
+      }));
       
       stopCamera();
       setIsProcessing(false);
-      onScanComplete(mockIngredients);
-    }, 1500);
-  }, [stopCamera, onScanComplete]);
+      onScanComplete(ingredients);
+      
+    } catch (error) {
+      console.error('Error processing ingredients:', error);
+      
+      // Fallback to basic data structure
+      const ingredients: Ingredient[] = detectedItems.map((name, index) => ({
+        id: `${Date.now()}-${index}`,
+        name: name,
+        quantity: 1,
+        unit: 'unidades',
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        imageUrl: '',
+        detectedAt: new Date(),
+        confidence: 0.85
+      }));
+      
+      stopCamera();
+      setIsProcessing(false);
+      onScanComplete(ingredients);
+    }
+  }, [detectedItems, stopCamera, onScanComplete]);
 
   const retryPermission = useCallback(() => {
     setPermissionError(null);
     startCamera();
   }, [startCamera]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [stream]);
 
   // Show permission error
   if (permissionError) {
@@ -193,22 +274,25 @@ export function CameraScanner({ onScanComplete }: CameraScannerProps) {
   }
 
   return (
-    <div className="relative w-full h-full min-h-[600px] bg-black rounded-3xl overflow-hidden">
+    <div className="relative w-full aspect-video min-h-[500px] bg-black rounded-3xl overflow-hidden shadow-2xl">
       <video
         ref={videoRef}
         autoPlay
         playsInline
         muted
-        className="w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-cover"
       />
       
-      {/* Overlay with detected items */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40">
+      {/* Hidden canvas for capturing frames */}
+      <canvas ref={canvasRef} className="hidden" />
+      
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 pointer-events-none">
         {/* Top bar */}
-        <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center">
+        <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center pointer-events-auto">
           <div className="flex items-center gap-2 bg-white/20 backdrop-blur-xl px-4 py-2 rounded-full">
             <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-            <span className="text-white text-sm font-medium">Digitalizando...</span>
+            <span className="text-white text-sm font-medium">Câmera Ativa</span>
           </div>
           <Button
             onClick={stopCamera}
@@ -220,9 +304,40 @@ export function CameraScanner({ onScanComplete }: CameraScannerProps) {
           </Button>
         </div>
 
-        {/* Detected items */}
-        {detectedItems.length > 0 && (
-          <div className="absolute bottom-32 left-0 right-0 px-6">
+        {/* Center capture button - only show when NOT analyzing and NO detected items */}
+        {!isAnalyzing && detectedItems.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-auto">
+            <Button
+              onClick={captureAndAnalyze}
+              size="lg"
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-8 py-6 text-lg rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105"
+            >
+              <Sparkles className="w-6 h-6 mr-2" />
+              Detectar Ingredientes
+            </Button>
+          </div>
+        )}
+
+        {/* Analyzing state */}
+        {isAnalyzing && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl p-8 shadow-2xl">
+              <div className="flex flex-col items-center gap-4">
+                <Loader2 className="w-12 h-12 text-emerald-600 animate-spin" />
+                <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  Analisando ingredientes...
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  A IA está processando a imagem
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Detected items - only show after analysis is complete */}
+        {!isAnalyzing && detectedItems.length > 0 && (
+          <div className="absolute bottom-6 left-0 right-0 px-6 pointer-events-auto">
             <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
               <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Ingredientes Detectados
@@ -239,23 +354,34 @@ export function CameraScanner({ onScanComplete }: CameraScannerProps) {
                   </div>
                 ))}
               </div>
-              <Button
-                onClick={confirmScan}
-                disabled={isProcessing}
-                className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Processando...
-                  </>
-                ) : (
-                  <>
-                    <Check className="w-5 h-5 mr-2" />
-                    Confirmar Ingredientes
-                  </>
-                )}
-              </Button>
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => {
+                    setDetectedItems([]);
+                  }}
+                  variant="outline"
+                  className="flex-1 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 py-6 rounded-xl"
+                >
+                  Tentar Novamente
+                </Button>
+                <Button
+                  onClick={confirmScan}
+                  disabled={isProcessing}
+                  className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Processando...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-5 h-5 mr-2" />
+                      Confirmar
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         )}
