@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Camera, X, Check, Loader2, AlertCircle } from 'lucide-react';
+import { Camera, X, Check, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Ingredient } from '@/lib/types';
 
@@ -12,6 +12,7 @@ interface CameraScannerProps {
 export function CameraScanner({ onScanComplete }: CameraScannerProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [detectedItems, setDetectedItems] = useState<string[]>([]);
   const [permissionError, setPermissionError] = useState<string | null>(null);
@@ -50,10 +51,6 @@ export function CameraScanner({ onScanComplete }: CameraScannerProps) {
         }
       }, 100);
       
-      // Simulate AI detection after 2 seconds
-      setTimeout(() => {
-        setDetectedItems(['Tomate', 'Cebola', 'Alho']);
-      }, 2000);
     } catch (error: any) {
       console.error('Camera error:', error);
       // Handle specific permission errors
@@ -82,8 +79,19 @@ export function CameraScanner({ onScanComplete }: CameraScannerProps) {
       videoRef.current.srcObject = null;
     }
     setIsScanning(false);
+    setIsAnalyzing(false);
     setDetectedItems([]);
   }, [stream]);
+
+  const captureAndAnalyze = useCallback(() => {
+    setIsAnalyzing(true);
+    
+    // Simulate AI detection after 2 seconds
+    setTimeout(() => {
+      setDetectedItems(['Tomate', 'Cebola', 'Alho']);
+      setIsAnalyzing(false);
+    }, 2000);
+  }, []);
 
   const confirmScan = useCallback(() => {
     setIsProcessing(true);
@@ -218,13 +226,13 @@ export function CameraScanner({ onScanComplete }: CameraScannerProps) {
         style={{ transform: 'scaleX(-1)' }}
       />
       
-      {/* Overlay with detected items */}
+      {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 pointer-events-none">
         {/* Top bar */}
         <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center pointer-events-auto">
           <div className="flex items-center gap-2 bg-white/20 backdrop-blur-xl px-4 py-2 rounded-full">
             <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-            <span className="text-white text-sm font-medium">Digitalizando...</span>
+            <span className="text-white text-sm font-medium">Câmera Ativa</span>
           </div>
           <Button
             onClick={stopCamera}
@@ -236,8 +244,39 @@ export function CameraScanner({ onScanComplete }: CameraScannerProps) {
           </Button>
         </div>
 
-        {/* Detected items */}
-        {detectedItems.length > 0 && (
+        {/* Center capture button - only show when NOT analyzing and NO detected items */}
+        {!isAnalyzing && detectedItems.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-auto">
+            <Button
+              onClick={captureAndAnalyze}
+              size="lg"
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-8 py-6 text-lg rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105"
+            >
+              <Sparkles className="w-6 h-6 mr-2" />
+              Detectar Ingredientes
+            </Button>
+          </div>
+        )}
+
+        {/* Analyzing state */}
+        {isAnalyzing && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl p-8 shadow-2xl">
+              <div className="flex flex-col items-center gap-4">
+                <Loader2 className="w-12 h-12 text-emerald-600 animate-spin" />
+                <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  Analisando ingredientes...
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  A IA está processando a imagem
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Detected items - only show after analysis is complete */}
+        {!isAnalyzing && detectedItems.length > 0 && (
           <div className="absolute bottom-6 left-0 right-0 px-6 pointer-events-auto">
             <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
               <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
@@ -255,23 +294,34 @@ export function CameraScanner({ onScanComplete }: CameraScannerProps) {
                   </div>
                 ))}
               </div>
-              <Button
-                onClick={confirmScan}
-                disabled={isProcessing}
-                className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Processando...
-                  </>
-                ) : (
-                  <>
-                    <Check className="w-5 h-5 mr-2" />
-                    Confirmar Ingredientes
-                  </>
-                )}
-              </Button>
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => {
+                    setDetectedItems([]);
+                  }}
+                  variant="outline"
+                  className="flex-1 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 py-6 rounded-xl"
+                >
+                  Tentar Novamente
+                </Button>
+                <Button
+                  onClick={confirmScan}
+                  disabled={isProcessing}
+                  className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Processando...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-5 h-5 mr-2" />
+                      Confirmar
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         )}
