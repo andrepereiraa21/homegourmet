@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Plus, Trash2, Edit2, TrendingUp, Flame, Activity, X, Save, Crown, Lock, Calendar } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Edit2, TrendingUp, Flame, Activity, X, Save, Crown, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Navigation } from '@/components/custom/navigation';
 import { Ingredient } from '@/lib/types';
@@ -92,20 +92,12 @@ const getIngredientImage = (name: string): string => {
   return 'https://images.unsplash.com/photo-1506368249639-73a05d6f6488?w=400&h=400&fit=crop';
 };
 
-interface WeeklyMeal {
-  day: string;
-  breakfast: string;
-  lunch: string;
-  dinner: string;
-}
-
 export default function InventoryPage() {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
   const [editQuantity, setEditQuantity] = useState<number>(0);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [isPremium, setIsPremium] = useState(false);
-  const [weeklyPlan, setWeeklyPlan] = useState<WeeklyMeal[]>([]);
+  const [isPremium, setIsPremium] = useState(false); // Estado para verificar se é premium
   const [newIngredient, setNewIngredient] = useState({
     name: '',
     quantity: 1,
@@ -113,23 +105,18 @@ export default function InventoryPage() {
   });
 
   useEffect(() => {
-    // Load from localStorage
+    // Load from localStorage (will be Supabase in Module 2)
     const stored = localStorage.getItem('scannedIngredients');
     if (stored) {
       setIngredients(JSON.parse(stored));
     } else {
+      // Use mock data for demo
       setIngredients(mockIngredients);
     }
     
     // Check premium status
     const premiumStatus = localStorage.getItem('isPremium');
     setIsPremium(premiumStatus === 'true');
-
-    // Load weekly plan
-    const storedPlan = localStorage.getItem('weeklyMealPlan');
-    if (storedPlan) {
-      setWeeklyPlan(JSON.parse(storedPlan));
-    }
   }, []);
 
   const totalCalories = ingredients.reduce((sum, ing) => sum + ing.calories * ing.quantity, 0);
@@ -195,11 +182,6 @@ export default function InventoryPage() {
     }
   };
 
-  const clearWeeklyPlan = () => {
-    setWeeklyPlan([]);
-    localStorage.removeItem('weeklyMealPlan');
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-950 dark:via-gray-900 dark:to-emerald-950/20 pb-20">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -227,64 +209,6 @@ export default function InventoryPage() {
             </Button>
           </Link>
         </div>
-
-        {/* Weekly Meal Plan Section */}
-        {weeklyPlan.length > 0 && (
-          <div className="mb-8">
-            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-gray-200 dark:border-gray-700">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
-                    <Calendar className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                      Planejamento Semanal
-                    </h2>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {weeklyPlan.length} refeições planejadas
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  onClick={clearWeeklyPlan}
-                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 has-[>svg]:px-3 flex-1 rounded-2xl py-6 text-lg font-semibold border-gray-300 dark:border-gray-600"
-                >
-                  <Trash2 className="w-5 h-5" />
-                  Limpar Plano
-                </Button>
-              </div>
-
-              <div className="space-y-3">
-                {weeklyPlan.map((meal, index) => (
-                  <div
-                    key={index}
-                    className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4"
-                  >
-                    <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-2">
-                      {meal.day}
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
-                      <div>
-                        <span className="text-gray-600 dark:text-gray-400">Café: </span>
-                        <span className="text-gray-900 dark:text-gray-100">{meal.breakfast}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600 dark:text-gray-400">Almoço: </span>
-                        <span className="text-gray-900 dark:text-gray-100">{meal.lunch}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600 dark:text-gray-400">Jantar: </span>
-                        <span className="text-gray-900 dark:text-gray-100">{meal.dinner}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Nutrition Summary - Premium Only */}
         {isPremium ? (
@@ -338,7 +262,7 @@ export default function InventoryPage() {
                 <p className="text-white/90 text-sm mb-4">
                   Desbloqueie informações detalhadas sobre calorias e macronutrientes dos seus ingredientes
                 </p>
-                <Link href="/profile/premium">
+                <Link href="/premium">
                   <Button className="bg-white hover:bg-gray-100 text-amber-600 rounded-xl font-semibold">
                     <Crown className="w-4 h-4 mr-2" />
                     Ativar Premium
@@ -580,7 +504,7 @@ export default function InventoryPage() {
         </div>
       )}
 
-      {/* Add Manual Ingredient Modal */}
+      {/* Add Manual Ingredient Modal - Simplificado */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in fade-in slide-in-from-bottom-4">

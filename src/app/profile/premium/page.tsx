@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft, Crown, Check, Calendar, CreditCard, Sparkles, Zap, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Navigation } from '@/components/custom/navigation';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export default function PremiumPage() {
   // Simulação de dados do usuário premium
@@ -13,24 +13,10 @@ export default function PremiumPage() {
   const [premiumEndDate] = useState('15 de Fevereiro de 2025');
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('monthly');
 
-  useEffect(() => {
-    // Verificar status premium do localStorage ao carregar
-    const premiumStatus = localStorage.getItem('isPremium');
-    if (premiumStatus === 'true') {
-      setIsPremium(true);
-    }
-  }, []);
-
   const handlePurchase = (plan: 'monthly' | 'annual') => {
     // Aqui você implementaria a lógica de pagamento
     alert(`Processando compra do plano ${plan === 'monthly' ? 'Mensal' : 'Anual'}...`);
     setIsPremium(true);
-    
-    // Salvar status premium no localStorage
-    localStorage.setItem('isPremium', 'true');
-    
-    // Disparar evento customizado para atualizar outros componentes
-    window.dispatchEvent(new Event('premiumStatusChanged'));
   };
 
   return (
@@ -192,22 +178,6 @@ export default function PremiumPage() {
                   </div>
                 </div>
               </div>
-
-              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center shrink-0">
-                    <Check className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                      Garantia de 7 Dias
-                    </h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Não está satisfeito? Reembolsamos 100% do seu dinheiro nos primeiros 7 dias
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         )}
@@ -220,7 +190,7 @@ export default function PremiumPage() {
               Escolha o Seu Plano
             </h3>
             
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
               {/* Plano Mensal */}
               <div 
                 className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl p-8 shadow-xl border-2 transition-all cursor-pointer ${
@@ -325,6 +295,16 @@ export default function PremiumPage() {
                   Ativar Premium Anual
                 </Button>
               </div>
+            </div>
+
+            {/* Garantia */}
+            <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-6 text-center shadow-xl">
+              <h4 className="text-white font-bold text-lg mb-2">
+                ✨ Garantia de 7 Dias
+              </h4>
+              <p className="text-white/90 text-sm">
+                Não está satisfeito? Reembolsamos 100% do seu dinheiro nos primeiros 7 dias
+              </p>
             </div>
           </div>
         )}
