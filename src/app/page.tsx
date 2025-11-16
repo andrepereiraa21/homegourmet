@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Camera, Package, BookOpen, Sparkles, ChefHat, Clock, LogIn, UserPlus, Crown } from 'lucide-react';
+import { Camera, Package, BookOpen, Sparkles, ChefHat, Clock, LogIn, UserPlus, Crown, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Navigation } from '@/components/custom/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -38,6 +38,19 @@ export default function Home() {
           </Link>
         </div>
       )}
+
+      {/* Admin Import Button - Top Left */}
+      <div className="absolute top-4 left-4 z-10">
+        <Link href="/admin/import-recipes">
+          <Button
+            variant="outline"
+            className="border-blue-500 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded-xl shadow-lg"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Importar Receitas
+          </Button>
+        </Link>
+      </div>
 
       {/* Hero Section */}
       <div className="relative overflow-hidden">

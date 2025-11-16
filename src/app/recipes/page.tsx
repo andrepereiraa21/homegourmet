@@ -9,6 +9,7 @@ import { Navigation } from '@/components/custom/navigation';
 import { Recipe, Ingredient } from '@/lib/types';
 import { mockRecipes } from '@/lib/mock-data';
 import Image from 'next/image';
+import { getSupabase } from '@/lib/supabase';
 
 export default function RecipesPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -19,6 +20,7 @@ export default function RecipesPage() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [selectedDietaryFilters, setSelectedDietaryFilters] = useState<string[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const dietaryOptions = [
     { id: 'vegetarian', label: 'Vegetariano', emoji: '🥗' },
@@ -51,9 +53,55 @@ export default function RecipesPage() {
       setFavorites(JSON.parse(storedFavorites));
     }
     
-    // Use mock recipes
-    setRecipes(mockRecipes);
+    // Buscar receitas do Supabase
+    loadRecipes();
   }, []);
+
+  const loadRecipes = async () => {
+    try {
+      setLoading(true);
+      const supabase = getSupabase();
+      
+      const { data, error } = await supabase
+        .from('recipes')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao buscar receitas:', error);
+        // Se houver erro, usar receitas mock como fallback
+        setRecipes(mockRecipes);
+      } else if (data && data.length > 0) {
+        // Converter dados do Supabase para o formato Recipe
+        const formattedRecipes: Recipe[] = data.map((recipe: any) => ({
+          id: recipe.id,
+          title: recipe.name,
+          description: recipe.description || '',
+          imageUrl: recipe.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop',
+          prepTime: recipe.prep_time || 30,
+          cookTime: recipe.cook_time || 30,
+          servings: recipe.servings || 4,
+          difficulty: recipe.difficulty?.toLowerCase() === 'fácil' ? 'easy' : 
+                     recipe.difficulty?.toLowerCase() === 'difícil' ? 'hard' : 'medium',
+          calories: recipe.nutrition?.calories || 350,
+          ingredients: recipe.ingredients || [],
+          instructions: recipe.instructions || [],
+          tags: recipe.tags || [],
+          isPremium: recipe.is_premium || false
+        }));
+        
+        setRecipes(formattedRecipes);
+      } else {
+        // Se não houver receitas no banco, usar mock
+        setRecipes(mockRecipes);
+      }
+    } catch (err) {
+      console.error('Erro ao carregar receitas:', err);
+      setRecipes(mockRecipes);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleFavorite = (recipeId: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -344,92 +392,102 @@ export default function RecipesPage() {
           </div>
         )}
 
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">Carregando receitas...</p>
+          </div>
+        )}
+
         {/* Recipes Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredRecipes.map((recipe) => (
-            <Link key={recipe.id} href={`/recipes/${recipe.id}`}>
-              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 border border-gray-200 dark:border-gray-700 group">
-                {/* Recipe Image */}
-                <div className="relative h-48 overflow-hidden">
-                  <Image
-                    src={recipe.imageUrl}
-                    alt={recipe.title}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                  {recipe.matchPercentage && (
-                    <div className="absolute top-4 right-4 bg-emerald-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
-                      {recipe.matchPercentage}% Match
-                    </div>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={`absolute top-4 left-4 backdrop-blur-xl hover:scale-110 rounded-full shadow-lg transition-all ${
-                      favorites.includes(recipe.id)
-                        ? 'bg-red-500 hover:bg-red-600'
-                        : 'bg-white/90 dark:bg-gray-900/90 hover:bg-white dark:hover:bg-gray-900'
-                    }`}
-                    onClick={(e) => toggleFavorite(recipe.id, e)}
-                  >
-                    <Heart 
-                      className={`w-5 h-5 transition-all ${
-                        favorites.includes(recipe.id)
-                          ? 'fill-white text-white'
-                          : 'text-gray-700 dark:text-gray-300'
-                      }`}
+        {!loading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredRecipes.map((recipe) => (
+              <Link key={recipe.id} href={`/recipes/${recipe.id}`}>
+                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 border border-gray-200 dark:border-gray-700 group">
+                  {/* Recipe Image */}
+                  <div className="relative h-48 overflow-hidden">
+                    <Image
+                      src={recipe.imageUrl}
+                      alt={recipe.title}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-300"
                     />
-                  </Button>
-                </div>
-
-                {/* Recipe Info */}
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2 line-clamp-1">
-                    {recipe.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                    {recipe.description}
-                  </p>
-
-                  {/* Recipe Meta */}
-                  <div className="flex items-center gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      <span>{recipe.prepTime} min</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4" />
-                      <span>{recipe.servings} porções</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Flame className="w-4 h-4" />
-                      <span>{recipe.calories} kcal</span>
-                    </div>
-                  </div>
-
-                  {/* Difficulty Badge */}
-                  <div className="flex items-center justify-between">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        recipe.difficulty === 'easy'
-                          ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                          : recipe.difficulty === 'medium'
-                          ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400'
-                          : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                    {recipe.matchPercentage && (
+                      <div className="absolute top-4 right-4 bg-emerald-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                        {recipe.matchPercentage}% Match
+                      </div>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={`absolute top-4 left-4 backdrop-blur-xl hover:scale-110 rounded-full shadow-lg transition-all ${
+                        favorites.includes(recipe.id)
+                          ? 'bg-red-500 hover:bg-red-600'
+                          : 'bg-white/90 dark:bg-gray-900/90 hover:bg-white dark:hover:bg-gray-900'
                       }`}
+                      onClick={(e) => toggleFavorite(recipe.id, e)}
                     >
-                      {recipe.difficulty === 'easy' ? 'Fácil' : recipe.difficulty === 'medium' ? 'Médio' : 'Difícil'}
-                    </span>
-                    <ChefHat className="w-5 h-5 text-gray-400" />
+                      <Heart 
+                        className={`w-5 h-5 transition-all ${
+                          favorites.includes(recipe.id)
+                            ? 'fill-white text-white'
+                            : 'text-gray-700 dark:text-gray-300'
+                        }`}
+                      />
+                    </Button>
+                  </div>
+
+                  {/* Recipe Info */}
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2 line-clamp-1">
+                      {recipe.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                      {recipe.description}
+                    </p>
+
+                    {/* Recipe Meta */}
+                    <div className="flex items-center gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        <span>{recipe.prepTime} min</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users className="w-4 h-4" />
+                        <span>{recipe.servings} porções</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Flame className="w-4 h-4" />
+                        <span>{recipe.calories} kcal</span>
+                      </div>
+                    </div>
+
+                    {/* Difficulty Badge */}
+                    <div className="flex items-center justify-between">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          recipe.difficulty === 'easy'
+                            ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                            : recipe.difficulty === 'medium'
+                            ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400'
+                            : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                        }`}
+                      >
+                        {recipe.difficulty === 'easy' ? 'Fácil' : recipe.difficulty === 'medium' ? 'Médio' : 'Difícil'}
+                      </span>
+                      <ChefHat className="w-5 h-5 text-gray-400" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        )}
 
         {/* Empty State */}
-        {filteredRecipes.length === 0 && (
+        {!loading && filteredRecipes.length === 0 && (
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-700">
             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
               <ChefHat className="w-10 h-10 text-gray-400" />

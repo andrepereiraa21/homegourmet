@@ -94,6 +94,36 @@ const nextConfig: NextConfig = {
         hostname: 'cdn.pixabay.com',
       },
       
+      // Pingo Doce - Site de receitas
+      {
+        protocol: 'https',
+        hostname: 'www.pingodoce.pt',
+      },
+      
+      // Pingo Doce - Site de receitas
+      {
+        protocol: 'https',
+        hostname: 'www.pingodoce.pt',
+      },
+      
+      // Pingo Doce - Site de receitas
+      {
+        protocol: 'https',
+        hostname: 'www.pingodoce.pt',
+      },
+      
+      // Pingo Doce - Site de receitas
+      {
+        protocol: 'https',
+        hostname: 'www.pingodoce.pt',
+      },
+      
+      // Pingo Doce - Site de receitas
+      {
+        protocol: 'https',
+        hostname: 'www.pingodoce.pt',
+      },
+      
       // GitHub (avatares, imagens de repos)
       {
         protocol: 'https',
