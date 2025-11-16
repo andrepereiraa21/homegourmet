@@ -8,6 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ChefHat, Mail, Lock } from 'lucide-react';
 
+// Desabilita pre-rendering para evitar erro com useSearchParams
+export const dynamic = 'force-dynamic';
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();

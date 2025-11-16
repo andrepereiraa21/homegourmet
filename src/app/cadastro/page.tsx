@@ -8,6 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ChefHat, Mail, Lock, User, ArrowLeft } from 'lucide-react';
 
+// Desabilita pre-rendering para evitar problemas no build
+export const dynamic = 'force-dynamic';
+
 export default function CadastroPage() {
   const router = useRouter();
   const [name, setName] = useState('');
