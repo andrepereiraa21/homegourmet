@@ -199,16 +199,6 @@ export default function ProfilePage() {
             </Link>
           </div>
         </div>
-
-        {/* Coming Soon Banner */}
-        <div className="mt-8 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl p-6 shadow-xl">
-          <h3 className="text-lg font-bold text-white mb-2">
-            🚀 Módulo 2 em Desenvolvimento
-          </h3>
-          <p className="text-white/90 text-sm">
-            Integração com Supabase, autenticação e sincronização de dados em breve!
-          </p>
-        </div>
       </div>
 
       <Navigation />

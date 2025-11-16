@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, Sparkles, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CameraScanner } from '@/components/custom/camera-scanner';
 import { Navigation } from '@/components/custom/navigation';
@@ -48,14 +48,14 @@ export default function ScanPage() {
         <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-6 mb-8 shadow-xl">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-white/20 backdrop-blur-xl rounded-xl flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-6 h-6 text-white" />
+              <Camera className="w-6 h-6 text-white" />
             </div>
             <div>
               <h3 className="text-lg font-bold text-white mb-2">
-                Tecnologia de IA Avançada
+                Digitalize seus Ingredientes
               </h3>
               <p className="text-white/90 text-sm">
-                Reconhecimento automático de ingredientes com precisão superior a 90%
+                Aponte a câmera para seus ingredientes e deixe nossa IA identificá-los automaticamente com precisão superior a 90%
               </p>
             </div>
           </div>
@@ -102,10 +102,10 @@ export default function ScanPage() {
           </h3>
           <ul className="space-y-3">
             {[
-              'Identifique ingredientes automaticamente',
               'Posicione os ingredientes claramente visíveis',
               'Evite sobreposição de itens',
-              'Mantenha a câmera estável durante a captura'
+              'Mantenha a câmera estável durante a captura',
+              'Use boa iluminação para melhor reconhecimento'
             ].map((tip, index) => (
               <li key={index} className="flex items-start gap-3">
                 <div className="w-6 h-6 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
