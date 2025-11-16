@@ -179,6 +179,19 @@ export default function WeeklyPlanPage() {
     savePlan(newPlan);
   };
 
+  const clearDayData = (day: string) => {
+    const newPlan = {
+      ...weekPlan,
+      [day]: {
+        breakfast: '',
+        lunch: '',
+        snack: '',
+        dinner: ''
+      }
+    };
+    savePlan(newPlan);
+  };
+
   const clearAllData = () => {
     const emptyPlan: WeekPlan = {};
     DAYS.forEach(day => {
@@ -267,7 +280,8 @@ export default function WeeklyPlanPage() {
               <ArrowLeft className="w-5 h-5" />
             </Button>
           </Link>
-          <h1 className="text-xl font-semibold text-gray-900">
+          <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <Crown className="w-5 h-5 text-orange-500" />
             Planejamento Semanal
           </h1>
           <div className="w-10" />
@@ -286,14 +300,24 @@ export default function WeeklyPlanPage() {
                     <Calendar className="w-5 h-5 text-[#E67E22]" />
                     <h2 className="text-lg font-bold text-gray-900">{day}</h2>
                   </div>
-                  <Button
-                    onClick={() => generateAllMealsForDay(day)}
-                    size="sm"
-                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full px-4 py-2 text-sm font-medium shadow-md"
-                  >
-                    <Sparkles className="w-4 h-4 mr-1" />
-                    Gerar com IA
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={() => generateAllMealsForDay(day)}
+                      size="sm"
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full px-4 py-2 text-sm font-medium shadow-md"
+                    >
+                      <Sparkles className="w-4 h-4 mr-1" />
+                      Gerar com IA
+                    </Button>
+                    <Button
+                      onClick={() => clearDayData(day)}
+                      size="sm"
+                      variant="outline"
+                      className="border-red-200 hover:bg-red-50 text-red-600 hover:text-red-700 rounded-full px-4 py-2 text-sm font-medium"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Meals */}
